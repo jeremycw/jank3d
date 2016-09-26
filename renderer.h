@@ -6,6 +6,7 @@
 
 typedef struct {
   GLuint vao;
+  GLuint vbo;
   int vert_count;
   mat4_t transform;
 } render_obj_t;

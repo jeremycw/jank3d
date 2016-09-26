@@ -4,17 +4,21 @@
 void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
 void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
 
-void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer) {
+void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
   for (int i = 0; i < count; i++) {
     glUseProgram(renderer->program);
     GLuint mat_location = glGetUniformLocation(renderer->program, "model");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, render_obj->transform.buf);
+    glUniformMatrix4fv(mat_location, 1, GL_FALSE, render_objs[i].transform.buf);
     mat_location = glGetUniformLocation(renderer->program, "view");
     glUniformMatrix4fv(mat_location, 1, GL_FALSE, renderer->camera.view.buf);
     mat_location = glGetUniformLocation(renderer->program, "projection");
     glUniformMatrix4fv(mat_location, 1, GL_FALSE, renderer->camera.projection.buf);
-    glBindVertexArray(render_obj->vao);
-    glDrawArrays(GL_TRIANGLES, 0, render_obj->vert_count);
+    glBindVertexArray(render_objs[i].vao);
+    glDrawArrays(GL_TRIANGLES, 0, render_objs[i].vert_count);
+    GLuint error;
+    while ((error = glGetError()) != GL_NO_ERROR) {
+      printf("%X\n", error);
+    }
   }
 }
 
@@ -97,7 +101,13 @@ void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count
 
   render_obj->transform = m4_identity();
   render_obj->vao = vao;
+  render_obj->vbo = vbo;
   render_obj->vert_count = vert_count;
+
+  GLuint error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("%X\n", error);
+  }
 }
 
 void render(renderer_t* renderer) {

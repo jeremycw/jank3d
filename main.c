@@ -35,6 +35,8 @@ int main() {
   };
 
   render_obj_t* tri = renderer_create_obj(renderer, points, 3);
+  render_obj_t* tri2 = renderer_create_obj(renderer, points, 3);
+  tri2->transform.m32 = 4.0f;
 
   float speed = 1.0f;
   double prev_time = glfwGetTime();
@@ -42,7 +44,8 @@ int main() {
     double time = glfwGetTime();
     double elapsed_time = time - prev_time;
     tri->transform.m30 += speed * elapsed_time;
-    if (tri->transform.m30 >= 1.0f || tri->transform.m30 <= -1.0f) {
+    tri2->transform.m30 -= speed * elapsed_time;
+    if (tri2->transform.m30 >= 1.0f || tri2->transform.m30 <= -1.0f) {
       speed = -speed;
     }
     render(renderer);

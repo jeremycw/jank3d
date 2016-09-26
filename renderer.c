@@ -1,6 +1,9 @@
 #include <GL/glew.h>
 #include "renderer.h"
 
+void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
+void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
+
 void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer) {
   for (int i = 0; i < count; i++) {
     glUseProgram(renderer->program);
@@ -95,6 +98,15 @@ void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count
   render_obj->transform = m4_identity();
   render_obj->vao = vao;
   render_obj->vert_count = vert_count;
-  
 }
 
+void render(renderer_t* renderer) {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  render_objs(renderer->render_objs, renderer->obj_count, renderer);
+}
+
+render_obj_t* renderer_create_obj(renderer_t* renderer, float* vertices, int vert_count) {
+  render_obj_create(renderer->render_objs + renderer->obj_count, vertices, vert_count);
+  renderer->obj_count++;
+  return &renderer->render_objs[renderer->obj_count-1];
+}

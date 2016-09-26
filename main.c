@@ -2,6 +2,7 @@
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "renderer.h"
 #define MATH_3D_IMPLEMENTATION
 #include "math_3d.h"
@@ -24,8 +25,8 @@ int main() {
   }
   glfwMakeContextCurrent(window);
 
-  renderer_t renderer;
-  renderer_init(&renderer);
+  renderer_t* renderer = malloc(sizeof(renderer_t));
+  renderer_init(renderer);
 
   GLfloat points[] = {
      0.0f,  0.5f, 0.0f,
@@ -33,20 +34,18 @@ int main() {
     -0.5f, -0.5f, 0.0f,
   };
 
-  render_obj_t tri;
-  render_obj_create(&tri, points, 3);
+  render_obj_t* tri = renderer_create_obj(renderer, points, 3);
 
   float speed = 1.0f;
   double prev_time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
     double time = glfwGetTime();
     double elapsed_time = time - prev_time;
-    tri.transform.m30 += speed * elapsed_time;
-    if (tri.transform.m30 >= 1.0f || tri.transform.m30 <= -1.0f) {
+    tri->transform.m30 += speed * elapsed_time;
+    if (tri->transform.m30 >= 1.0f || tri->transform.m30 <= -1.0f) {
       speed = -speed;
     }
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    render_objs(&tri, 1, &renderer);
+    render(renderer);
     glfwPollEvents();
     glfwSwapBuffers(window);
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {

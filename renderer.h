@@ -20,10 +20,12 @@ typedef struct {
 typedef struct {
   camera_t camera;
   GLuint program;
+  int obj_count;
+  render_obj_t render_objs[1024];
 } renderer_t;
 
-void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
 void renderer_init(renderer_t* renderer);
-void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
+void render(renderer_t* renderer);
+render_obj_t* renderer_create_obj(renderer_t* renderer, float* vertices, int vert_count);
 
 #endif

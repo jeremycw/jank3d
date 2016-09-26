@@ -97,10 +97,11 @@ int main() {
     "  frag_colour = vec4(colour, 1.0);"
     "}";
 
-  vec3_t camera_position = vec3(2.0f, 0.0f, -2.0f);
-  mat4_t view_matrix = m4_look_at(camera_position, vec3(0,0,0), vec3(0,1,0));
-  mat4_t projection_matrix = m4_perspective(67.0f, 1.333, 0.1f, 1000);
-  m4_print(view_matrix);
+  camera_t camera;
+  camera.position = vec3(2.0f, 0.0f, -2.0f);
+  camera.up = vec3(0,1,0);
+  camera.view = m4_look_at(camera.position, vec3(0,0,0), camera.up);
+  camera.projection = m4_perspective(67.0f, 1.333, 0.1f, 1000);
 
   GLuint vs = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vs, 1, &vert_shader, NULL);
@@ -115,6 +116,7 @@ int main() {
   glBindAttribLocation(program, 0, "vposition");
   glBindAttribLocation(program, 1, "vcolour");
   glLinkProgram(program);
+  tri.program = program;
   
   GLsizei len;
   char log[1024];
@@ -135,15 +137,7 @@ int main() {
       speed = -speed;
     }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(program);
-    GLuint mat_location = glGetUniformLocation(program, "model");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, tri.transform.buf);
-    mat_location = glGetUniformLocation(program, "view");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, view_matrix.buf);
-    mat_location = glGetUniformLocation(program, "projection");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, projection_matrix.buf);
-    glBindVertexArray(tri.vao);
-    glDrawArrays(GL_TRIANGLES, 0, tri.vert_count);
+    render_objs(&tri, 1, &camera);
     glfwPollEvents();
     glfwSwapBuffers(window);
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {

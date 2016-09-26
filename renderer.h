@@ -6,6 +6,7 @@
 
 typedef struct {
   GLuint vao;
+  GLuint program;
   int vert_count;
   mat4_t transform;
 } render_obj_t;
@@ -16,5 +17,7 @@ typedef struct {
   mat4_t view;
   mat4_t projection;
 } camera_t;
+
+void render_objs(render_obj_t* render_obj, int count, camera_t* camera);
 
 #endif

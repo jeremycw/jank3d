@@ -24,16 +24,8 @@ int main() {
   }
   glfwMakeContextCurrent(window);
 
-  glewExperimental = GL_TRUE;
-  glewInit();
-
-  const GLubyte* renderer = glGetString(GL_RENDERER);
-  const GLubyte* version = glGetString(GL_VERSION);
-  printf("Renderer: %s\n", renderer);
-  printf("Version: %s\n", version);
-
-  glEnable(GL_DEPTH_TEST);
-  glDepthFunc(GL_LESS);
+  renderer_t renderer;
+  renderer_init(&renderer);
 
   GLfloat points[] = {
      0.0f,  0.5f, 0.0f,
@@ -68,65 +60,7 @@ int main() {
   tri.transform = m4_identity();
   tri.vao = vao;
   tri.vert_count = sizeof(points) / 3;
-
-  const char* vert_shader =
-    "#version 150\n"
-
-    "in vec3 vposition;"
-    "in vec3 vcolour;"
-
-    "uniform mat4 model;"
-    "uniform mat4 view;"
-    "uniform mat4 projection;"
-
-    "out vec3 colour;"
-
-    "void main() {"
-    "  colour = vcolour;"
-    "  gl_Position = projection * view * model * vec4(vposition, 1.0);"
-    "}";
-
-  const char* frag_shader =
-    "#version 150\n"
-
-    "in vec3 colour;"
-
-    "out vec4 frag_colour;"
-
-    "void main() {"
-    "  frag_colour = vec4(colour, 1.0);"
-    "}";
-
-  camera_t camera;
-  camera.position = vec3(2.0f, 0.0f, -2.0f);
-  camera.up = vec3(0,1,0);
-  camera.view = m4_look_at(camera.position, vec3(0,0,0), camera.up);
-  camera.projection = m4_perspective(67.0f, 1.333, 0.1f, 1000);
-
-  GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vs, 1, &vert_shader, NULL);
-  glCompileShader(vs);
-  GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fs, 1, &frag_shader, NULL);
-  glCompileShader(fs);
-
-  GLuint program = glCreateProgram();
-  glAttachShader(program, vs);
-  glAttachShader(program, fs);
-  glBindAttribLocation(program, 0, "vposition");
-  glBindAttribLocation(program, 1, "vcolour");
-  glLinkProgram(program);
-  tri.program = program;
   
-  GLsizei len;
-  char log[1024];
-  glGetProgramInfoLog(program, 1024, &len, log);
-  printf("%s\n", log);
-  GLuint error;
-  while ((error = glGetError()) != GL_NO_ERROR) {
-    printf("%X\n", error);
-  }
-
   float speed = 1.0f;
   double prev_time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
@@ -137,7 +71,7 @@ int main() {
       speed = -speed;
     }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    render_objs(&tri, 1, &camera);
+    render_objs(&tri, 1, &renderer);
     glfwPollEvents();
     glfwSwapBuffers(window);
     if (GLFW_PRESS == glfwGetKey(window, GLFW_KEY_ESCAPE)) {

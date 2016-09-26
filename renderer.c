@@ -79,3 +79,22 @@ void renderer_init(renderer_t* renderer) {
   camera.projection = m4_perspective(67.0f, 1.333, 0.1f, 1000);
   renderer->camera = camera;
 }
+
+void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count) {
+  GLuint vao;
+  glGenVertexArrays(1, &vao);
+  glBindVertexArray(vao);
+  glEnableVertexAttribArray(0);
+
+  GLuint vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(float) * 3, vertices, GL_STATIC_DRAW);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+  render_obj->transform = m4_identity();
+  render_obj->vao = vao;
+  render_obj->vert_count = vert_count;
+  
+}
+

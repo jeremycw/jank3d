@@ -24,5 +24,6 @@ typedef struct {
 
 void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
 void renderer_init(renderer_t* renderer);
+void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
 
 #endif

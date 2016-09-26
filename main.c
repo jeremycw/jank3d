@@ -33,22 +33,9 @@ int main() {
     -0.5f, -0.5f, 0.0f,
   };
 
-  GLuint vao;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-  glEnableVertexAttribArray(0);
-
-  GLuint vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
   render_obj_t tri;
-  tri.transform = m4_identity();
-  tri.vao = vao;
-  tri.vert_count = sizeof(points) / 3;
-  
+  render_obj_create(&tri, points, 3);
+
   float speed = 1.0f;
   double prev_time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {

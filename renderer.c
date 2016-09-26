@@ -31,28 +31,22 @@ void renderer_init(renderer_t* renderer) {
     "#version 150\n"
 
     "in vec3 vposition;"
-    "in vec3 vcolour;"
 
     "uniform mat4 model;"
     "uniform mat4 view;"
     "uniform mat4 projection;"
 
-    "out vec3 colour;"
-
     "void main() {"
-    "  colour = vcolour;"
     "  gl_Position = projection * view * model * vec4(vposition, 1.0);"
     "}";
 
   const char* frag_shader =
     "#version 150\n"
 
-    "in vec3 colour;"
-
     "out vec4 frag_colour;"
 
     "void main() {"
-    "  frag_colour = vec4(colour, 1.0);"
+    "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
     "}";
 
   GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -66,7 +60,6 @@ void renderer_init(renderer_t* renderer) {
   glAttachShader(program, vs);
   glAttachShader(program, fs);
   glBindAttribLocation(program, 0, "vposition");
-  glBindAttribLocation(program, 1, "vcolour");
   glLinkProgram(program);
   renderer->program = program;
 

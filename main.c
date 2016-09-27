@@ -35,6 +35,8 @@ int main() {
   };
 
   render_obj_t* tri = renderer_create_obj(renderer, points, 3);
+  tri->quat = quat_axis_angle(renderer->camera.up, 0.78);
+  tri->transform = m4_from_quat(tri->quat);
   render_obj_t* tri2 = renderer_create_obj(renderer, points, 3);
   tri2->transform.m32 = 4.0f;
 

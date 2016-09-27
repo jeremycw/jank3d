@@ -5,10 +5,10 @@
 #include "math_3d.h"
 
 typedef struct {
-  GLuint vao;
-  GLuint vbo;
-  int vert_count;
   mat4_t transform;
+  quat_t quat;
+  GLuint vao;
+  int vert_count;
 } render_obj_t;
 
 typedef struct {

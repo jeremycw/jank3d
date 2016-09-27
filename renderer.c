@@ -100,8 +100,8 @@ void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
   render_obj->transform = m4_identity();
+  render_obj->quat = quat_identity();
   render_obj->vao = vao;
-  render_obj->vbo = vbo;
   render_obj->vert_count = vert_count;
 
   GLuint error;

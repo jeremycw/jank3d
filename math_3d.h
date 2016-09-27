@@ -382,8 +382,12 @@ quat_t quat_div(quat_t q0, quat_t q1);
 quat_t quat_inverse(quat_t q);
 quat_t quat_conj   (quat_t q);
 float quat_dot(quat_t q0, quat_t q1);
+quat_t quat_nlerp(quat_t a, quat_t b, float t);
 quat_t quat_lerp(quat_t a, quat_t b, float t);
 quat_t quat_slerp(quat_t a, quat_t b, float t);
+mat4_t m4_from_quat(quat_t q);
+quat_t quat_norm(quat_t q);
+float quat_mag(quat_t q);
 
 #endif // MATH_3D_HEADER
 
@@ -444,6 +448,8 @@ float quat_dot(quat_t q0, quat_t q1) { float r = v3_dot(q0.xyz, q1.xyz) + q0.w*q
 
 quat_t quat_lerp(quat_t a, quat_t b, float t)  { return (quat_t) { .xyzw = v4_lerp(a.xyzw, b.xyzw, t) }; }
 
+quat_t quat_nlerp(quat_t a, quat_t b, float t) { a = quat_lerp(a, b, t); return quat_norm(a); }
+
 quat_t quat_slerp(quat_t a, quat_t b, float t) {
   quat_t x, y, z;
   float cos_theta, angle;
@@ -473,6 +479,39 @@ quat_t quat_slerp(quat_t a, quat_t b, float t) {
   z = quat_add(x, y);
   return (quat_t) { .xyzw = v4_muls(d.xyzw, is) };
 }
+
+
+mat4_t m4_from_quat(quat_t q) {
+  quat_t a;
+  float xx, yy, zz,
+        xy, xz, yz,
+        wx, wy, wz;
+
+  a = quat_norm(q);
+  xx = a.x*a.x; yy = a.y*a.y; zz = a.z*a.z;
+  xy = a.x*a.y; xz = a.x*a.z; yz = a.y*a.z;
+  wx = a.w*a.x; wy = a.w*a.y; wz = a.w*a.z;
+
+  mat4_t out = m4_identity();
+
+  out.m[0][0] = 1.0f - 2.0f*(yy + zz);
+  out.m[0][1] =        2.0f*(xy + wz);
+  out.m[0][2] =        2.0f*(xz - wy);
+
+  out.m[1][0] =        2.0f*(xy - wz);
+  out.m[1][1] = 1.0f - 2.0f*(xx + zz);
+  out.m[1][2] =        2.0f*(yz + wx);
+
+  out.m[2][0] =        2.0f*(xz + wy);
+  out.m[2][1] =        2.0f*(yz - wx);
+  out.m[2][2] = 1.0f - 2.0f*(xx + yy);
+  return out;
+}
+
+
+quat_t quat_divs(quat_t q, float f) { return (quat_t) { .xyzw = v4_divs(q.xyzw, f) }; }
+quat_t quat_norm(quat_t q) { return quat_divs(q, quat_mag(q)); }
+float quat_mag(quat_t q) { float r = sqrt(quat_dot(q, q)); return r; }
 
 /**
  * Creates a matrix to rotate around an axis by a given angle. The axis doesn't

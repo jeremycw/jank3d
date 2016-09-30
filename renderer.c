@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include "renderer.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
 void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
@@ -137,14 +138,25 @@ tex_t renderer_buffer_texture(const char* filename) {
   stbi_set_flip_vertically_on_load(1);
   unsigned char* image = stbi_load(filename, &t.x, &t.y, &t.n, 0);
 
+  GLuint tex_type;
+  switch (t.n) {
+    case 3:
+      tex_type = GL_RGB;
+      break;
+    case 4:
+      tex_type = GL_RGBA;
+      break;
+  }
+
   //create texture
   glGenTextures(1, &t.tex);
   glBindTexture(GL_TEXTURE_2D, t.tex);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.x, t.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+  glTexImage2D(GL_TEXTURE_2D, 0, tex_type, t.x, t.y, 0, tex_type, GL_UNSIGNED_BYTE, image);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  free(image);
   return t;
 }
 

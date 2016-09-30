@@ -1,5 +1,6 @@
 #include <GL/glew.h>
 #include "renderer.h"
+#include "stb_image.h"
 
 void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
 void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
@@ -23,6 +24,7 @@ void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
 }
 
 void renderer_init(renderer_t* renderer) {
+  renderer->active_tex_index = GL_TEXTURE0;
   glewExperimental = GL_TRUE;
   glewInit();
 
@@ -127,4 +129,33 @@ render_obj_t* renderer_create_obj(renderer_t* renderer, float* vertices, int ver
   render_obj_create(renderer->render_objs + renderer->obj_count, vertices, vert_count);
   renderer->obj_count++;
   return &renderer->render_objs[renderer->obj_count-1];
+}
+
+tex_t renderer_buffer_texture(renderer_t* renderer, const char* filename) {
+  tex_t t;
+  stbi_set_flip_vertically_on_load(1);
+  unsigned char* image = stbi_load(filename, &t.x, &t.y, &t.n, 0);
+
+  //create texture
+  glGenTextures(1, &t.tex);
+  glActiveTexture(renderer->active_tex_index);
+  renderer->active_tex_index++;
+  glBindTexture(GL_TEXTURE_2D, t.tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.x, t.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  return t;
+}
+
+void render_obj_attach_texture(render_obj_t* render_obj, tex_t tex, float* coords, int size) {
+  GLuint vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, size, coords, GL_STATIC_DRAW);
+  glBindVertexArray(render_obj->vao);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(1);
+  render_obj->tex = tex.tex;
 }

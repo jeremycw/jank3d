@@ -42,33 +42,20 @@ int main() {
   render_obj_t* tri2 = renderer_create_obj(renderer, points, 3);
   tri2->transform.m32 = 4.0f;
 
-  int x, y, n;
-  stbi_set_flip_vertically_on_load(1);
-  unsigned char* image = stbi_load("textures/default_grass.png", &x, &y, &n, 0);
+  tex_t tex = renderer_buffer_texture(renderer, "textures/default_grass.png");
+  GLuint error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    printf("%X\n", error);
+  }
 
-  GLuint tex;
-  glGenTextures(1, &tex);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
+  //create texture coords
   GLfloat texcoords[] = {
     0.5f, 1.0f,
     0.0f, 0.0f,
     1.0f, 0.0f
   };
 
-  GLuint vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
-  glBindVertexArray(tri->vao);
-  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-  glEnableVertexAttribArray(1);
+  render_obj_attach_texture(tri, tex, texcoords, sizeof(texcoords));
 
   float speed = 1.0f;
   double prev_time = glfwGetTime();

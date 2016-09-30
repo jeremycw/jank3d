@@ -42,11 +42,8 @@ int main() {
   render_obj_t* tri2 = renderer_create_obj(renderer, points, 3);
   tri2->transform.m32 = 4.0f;
 
-  tex_t tex = renderer_buffer_texture(renderer, "textures/default_grass.png");
-  GLuint error;
-  while ((error = glGetError()) != GL_NO_ERROR) {
-    printf("%X\n", error);
-  }
+  tex_t tex = renderer_buffer_texture("textures/default_grass.png");
+  tex_t tex2 = renderer_buffer_texture("textures/heart.png");
 
   //create texture coords
   GLfloat texcoords[] = {
@@ -56,6 +53,7 @@ int main() {
   };
 
   render_obj_attach_texture(tri, tex, texcoords, sizeof(texcoords));
+  render_obj_attach_texture(tri2, tex2, texcoords, sizeof(texcoords));
 
   float speed = 1.0f;
   double prev_time = glfwGetTime();

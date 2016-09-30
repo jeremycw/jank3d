@@ -8,6 +8,7 @@ void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
 void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
   for (int i = 0; i < count; i++) {
     glUseProgram(renderer->program);
+    glBindTexture(GL_TEXTURE_2D, render_objs[i].tex);
     GLuint mat_location = glGetUniformLocation(renderer->program, "model");
     glUniformMatrix4fv(mat_location, 1, GL_FALSE, render_objs[i].transform.buf);
     mat_location = glGetUniformLocation(renderer->program, "view");
@@ -24,7 +25,6 @@ void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
 }
 
 void renderer_init(renderer_t* renderer) {
-  renderer->active_tex_index = GL_TEXTURE0;
   glewExperimental = GL_TRUE;
   glewInit();
 
@@ -35,6 +35,7 @@ void renderer_init(renderer_t* renderer) {
 
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
+  glActiveTexture(GL_TEXTURE0);
 
   const char* vert_shader =
     "#version 150\n"
@@ -131,15 +132,13 @@ render_obj_t* renderer_create_obj(renderer_t* renderer, float* vertices, int ver
   return &renderer->render_objs[renderer->obj_count-1];
 }
 
-tex_t renderer_buffer_texture(renderer_t* renderer, const char* filename) {
+tex_t renderer_buffer_texture(const char* filename) {
   tex_t t;
   stbi_set_flip_vertically_on_load(1);
   unsigned char* image = stbi_load(filename, &t.x, &t.y, &t.n, 0);
 
   //create texture
   glGenTextures(1, &t.tex);
-  glActiveTexture(renderer->active_tex_index);
-  renderer->active_tex_index++;
   glBindTexture(GL_TEXTURE_2D, t.tex);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, t.x, t.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

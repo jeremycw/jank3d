@@ -23,7 +23,6 @@ typedef struct {
   camera_t camera;
   GLuint program;
   int obj_count;
-  int active_tex_index;
   render_obj_t render_objs[1024];
 } renderer_t;
 
@@ -37,7 +36,7 @@ typedef struct {
 void renderer_init(renderer_t* renderer);
 void render(renderer_t* renderer);
 render_obj_t* renderer_create_obj(renderer_t* renderer, float* vertices, int vert_count);
-tex_t renderer_buffer_texture(renderer_t* renderer, const char* filename);
+tex_t renderer_buffer_texture(const char* filename);
 void render_obj_attach_texture(render_obj_t* render_obj, tex_t tex, float* coords, int size);
 
 #endif

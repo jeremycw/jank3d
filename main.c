@@ -6,6 +6,8 @@
 #include "renderer.h"
 #define MATH_3D_IMPLEMENTATION
 #include "math_3d.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 int main() {
   if (!glfwInit()) {
@@ -29,9 +31,9 @@ int main() {
   renderer_init(renderer);
 
   GLfloat points[] = {
-     0.0f,  0.5f, 0.0f,
-     0.5f, -0.5f, 0.0f,
-    -0.5f, -0.5f, 0.0f,
+     0.0f,  0.5f, 0.0f, //top
+     0.5f, -0.5f, 0.0f, //bot left
+    -0.5f, -0.5f, 0.0f, //bot right
   };
 
   render_obj_t* tri = renderer_create_obj(renderer, points, 3);
@@ -39,6 +41,34 @@ int main() {
   tri->transform = m4_from_quat(tri->quat);
   render_obj_t* tri2 = renderer_create_obj(renderer, points, 3);
   tri2->transform.m32 = 4.0f;
+
+  int x, y, n;
+  stbi_set_flip_vertically_on_load(1);
+  unsigned char* image = stbi_load("textures/default_grass.png", &x, &y, &n, 0);
+
+  GLuint tex;
+  glGenTextures(1, &tex);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, x, y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+  GLfloat texcoords[] = {
+    0.5f, 1.0f,
+    0.0f, 0.0f,
+    1.0f, 0.0f
+  };
+
+  GLuint vbo;
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+  glBindVertexArray(tri->vao);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(1);
 
   float speed = 1.0f;
   double prev_time = glfwGetTime();

@@ -38,6 +38,9 @@ void renderer_init(renderer_t* renderer) {
     "#version 150\n"
 
     "in vec3 vposition;"
+    "in vec2 vtexcoords;"
+
+    "out vec2 texcoords;"
 
     "uniform mat4 model;"
     "uniform mat4 view;"
@@ -45,15 +48,19 @@ void renderer_init(renderer_t* renderer) {
 
     "void main() {"
     "  gl_Position = projection * view * model * vec4(vposition, 1.0);"
+    "  texcoords = vtexcoords;"
     "}";
 
   const char* frag_shader =
     "#version 150\n"
 
+    "in vec2 texcoords;"
+
+    "uniform sampler2D tex;"
     "out vec4 frag_colour;"
 
     "void main() {"
-    "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
+    "  frag_colour = texture(tex, texcoords);"
     "}";
 
   GLuint vs = glCreateShader(GL_VERTEX_SHADER);
@@ -67,6 +74,7 @@ void renderer_init(renderer_t* renderer) {
   glAttachShader(program, vs);
   glAttachShader(program, fs);
   glBindAttribLocation(program, 0, "vposition");
+  glBindAttribLocation(program, 1, "vtexcoords");
   glLinkProgram(program);
   renderer->program = program;
 

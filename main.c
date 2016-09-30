@@ -32,10 +32,11 @@ int main() {
     -0.5f, -0.5f, 0.0f, //bot right
   };
 
-  app.tri1 = renderer_create_obj(renderer, points, 3);
+  mesh_t mesh = renderer_buffer_mesh(points, 3);
+  app.tri1 = renderer_create_obj(renderer, mesh);
   app.tri1->quat = quat_axis_angle(renderer->camera.up, 0.78);
   app.tri1->transform = m4_from_quat(app.tri1->quat);
-  app.tri2 = renderer_create_obj(renderer, points, 3);
+  app.tri2 = renderer_create_obj(renderer, mesh);
   app.tri2->transform.m32 = 4.0f;
 
   //create texture coords

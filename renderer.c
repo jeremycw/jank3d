@@ -3,7 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count);
+void render_obj_create(render_obj_t* render_obj, mesh_t mesh);
 void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
 
 void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
@@ -17,7 +17,8 @@ void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
     mat_location = glGetUniformLocation(renderer->program, "projection");
     glUniformMatrix4fv(mat_location, 1, GL_FALSE, renderer->camera.projection.buf);
     glBindVertexArray(render_objs[i].vao);
-    glDrawArrays(GL_TRIANGLES, 0, render_objs[i].vert_count);
+    glBindBuffer(GL_ARRAY_BUFFER, render_objs[i].mesh.vbo);
+    glDrawArrays(GL_TRIANGLES, 0, render_objs[i].mesh.vert_count);
     GLuint error;
     while ((error = glGetError()) != GL_NO_ERROR) {
       printf("%X\n", error);
@@ -99,22 +100,17 @@ void renderer_init(renderer_t* renderer) {
   renderer->camera = camera;
 }
 
-void render_obj_create(render_obj_t* render_obj, float* vertices, int vert_count) {
+void render_obj_create(render_obj_t* render_obj, mesh_t mesh) {
   GLuint vao;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
-  glEnableVertexAttribArray(0);
-
-  GLuint vbo;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(float) * 3, vertices, GL_STATIC_DRAW);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+  glEnableVertexAttribArray(0);
 
   render_obj->transform = m4_identity();
   render_obj->quat = quat_identity();
   render_obj->vao = vao;
-  render_obj->vert_count = vert_count;
+  render_obj->mesh = mesh;
 
   GLuint error;
   while ((error = glGetError()) != GL_NO_ERROR) {
@@ -127,10 +123,19 @@ void render(renderer_t* renderer) {
   render_objs(renderer->render_objs, renderer->obj_count, renderer);
 }
 
-render_obj_t* renderer_create_obj(renderer_t* renderer, float* vertices, int vert_count) {
-  render_obj_create(renderer->render_objs + renderer->obj_count, vertices, vert_count);
+render_obj_t* renderer_create_obj(renderer_t* renderer, mesh_t mesh) {
+  render_obj_create(renderer->render_objs + renderer->obj_count, mesh);
   renderer->obj_count++;
   return &renderer->render_objs[renderer->obj_count-1];
+}
+
+mesh_t renderer_buffer_mesh(float* vertices, int vert_count) {
+  mesh_t mesh;
+  mesh.vert_count = vert_count;
+  glGenBuffers(1, &mesh.vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo);
+  glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(float) * 3, vertices, GL_STATIC_DRAW);
+  return mesh;
 }
 
 tex_t renderer_buffer_texture(const char* filename) {
@@ -154,8 +159,8 @@ tex_t renderer_buffer_texture(const char* filename) {
   glTexImage2D(GL_TEXTURE_2D, 0, tex_type, t.x, t.y, 0, tex_type, GL_UNSIGNED_BYTE, image);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   free(image);
   return t;
 }

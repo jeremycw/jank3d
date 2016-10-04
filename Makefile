@@ -1,7 +1,7 @@
 OBJS=main.o renderer.o window.o
 CC=clang
 CFLAGS+=-g -Wall -Wextra -Werror -std=c99
-LFLAGS+=-lglew -lglfw3 -framework opengl
+LFLAGS+=-lglew -lglfw3 -lassimp -framework opengl
 
 opengl: $(OBJS)
 	$(CC) $(OBJS) $(LFLAGS) -o opengl

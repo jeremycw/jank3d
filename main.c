@@ -32,7 +32,13 @@ int main() {
     -0.5f, -0.5f, 0.0f, //bot right
   };
 
-  mesh_t mesh = renderer_buffer_mesh(points, 3);
+  float uv[] = {
+    0.5f, 1.0f,
+    0.0f, 0.0f,
+    1.0f, 0.0f
+  };
+
+  mesh_t mesh = renderer_buffer_mesh(points, NULL, uv, 3);
   app.tri1 = renderer_create_obj(renderer, mesh);
   app.tri1->quat = quat_axis_angle(renderer->camera.up, 0.78);
   app.tri1->transform = m4_from_quat(app.tri1->quat);
@@ -40,17 +46,14 @@ int main() {
   app.tri2->transform.m32 = 4.0f;
 
   //create texture coords
-  float texcoords[] = {
-    0.5f, 1.0f,
-    0.0f, 0.0f,
-    1.0f, 0.0f
-  };
-
   tex_t tex = renderer_buffer_texture("textures/default_grass.png");
   tex_t tex2 = renderer_buffer_texture("textures/default_brick.png");
 
-  render_obj_attach_texture(app.tri1, tex, texcoords, sizeof(texcoords));
-  render_obj_attach_texture(app.tri2, tex2, texcoords, sizeof(texcoords));
+  render_obj_attach_texture(app.tri1, tex);
+  render_obj_attach_texture(app.tri2, tex2);
+
+  mesh = renderer_buffer_mesh_from_file("cube.dae");
+  renderer_create_obj(renderer, mesh);
 
   window_run(&window, update);
 
@@ -66,3 +69,4 @@ void update(float delta_time, void* data) {
   }
   render(app->renderer);
 }
+

@@ -9,6 +9,17 @@
 void render_obj_create(render_obj_t* render_obj, mesh_t mesh);
 void render_objs(render_obj_t* render_obj, int count, renderer_t* renderer);
 
+void print_error(char* message) {
+  GLuint error = glGetError();
+  if (error != GL_NO_ERROR) {
+    printf("%s: %X ", message, error);
+    while ((error = glGetError()) != GL_NO_ERROR) {
+      printf("%X ", error);
+    }
+    printf("\n");
+  }
+}
+
 void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
   for (int i = 0; i < count; i++) {
     glUseProgram(renderer->program);
@@ -21,10 +32,7 @@ void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
     glUniformMatrix4fv(mat_location, 1, GL_FALSE, renderer->camera.projection.buf);
     glBindVertexArray(render_objs[i].mesh.vao);
     glDrawArrays(GL_TRIANGLES, 0, render_objs[i].mesh.vert_count);
-    GLuint error;
-    while ((error = glGetError()) != GL_NO_ERROR) {
-      printf("%X\n", error);
-    }
+    print_error("drawing");
   }
 }
 
@@ -40,6 +48,7 @@ void renderer_init(renderer_t* renderer) {
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
   glActiveTexture(GL_TEXTURE0);
+  print_error("initializing");
 
   const char* vert_shader =
     "#version 150\n"
@@ -89,10 +98,7 @@ void renderer_init(renderer_t* renderer) {
   char log[1024];
   glGetProgramInfoLog(program, 1024, &len, log);
   printf("%s\n", log);
-  GLuint error;
-  while ((error = glGetError()) != GL_NO_ERROR) {
-    printf("%X\n", error);
-  }
+  print_error("compiling shaders");
 
   camera_t camera;
   camera.position = vec3(2.0f, 0.0f, -2.0f);
@@ -124,6 +130,7 @@ mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert
   mesh.vert_count = vert_count;
   glGenVertexArrays(1, &mesh.vao);
   glBindVertexArray(mesh.vao);
+  print_error("creating vao");
 
   GLuint vbo;
   glGenBuffers(1, &vbo);
@@ -131,6 +138,7 @@ mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert
   glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(float) * 3, vertices, GL_STATIC_DRAW);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
   glEnableVertexAttribArray(0);
+  print_error("buffering verts");
 
   if (uv) {
     glGenBuffers(1, &vbo);
@@ -138,6 +146,7 @@ mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert
     glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(float) * 2, uv, GL_STATIC_DRAW);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(1);
+    print_error("buffering uv");
   }
 
   if (normals) {
@@ -146,12 +155,9 @@ mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert
     glBufferData(GL_ARRAY_BUFFER, vert_count * sizeof(float) * 3, normals, GL_STATIC_DRAW);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     glEnableVertexAttribArray(2);
+    print_error("buffering normals");
   }
 
-  GLuint error;
-  while ((error = glGetError()) != GL_NO_ERROR) {
-    printf("%X\n", error);
-  }
   return mesh;
 }
 
@@ -163,7 +169,7 @@ mesh_t renderer_buffer_mesh_from_file(char* filename) {
   memcpy(vertices, mesh->mVertices, size);
 
   float* normals = NULL;
-  if (mesh->mNormals != NULL) {
+  if (mesh->mNormals) {
     normals = malloc(size);
     memcpy(normals, mesh->mNormals, size);
   }
@@ -172,8 +178,8 @@ mesh_t renderer_buffer_mesh_from_file(char* filename) {
     (void)uvs;
     //copy uv
   }
-  aiReleaseImport(scene);
   mesh_t m = renderer_buffer_mesh(vertices, normals, uvs, mesh->mNumVertices);
+  aiReleaseImport(scene);
   free(vertices);
   if (normals) free(normals);
   if (uvs) free(uvs);
@@ -203,6 +209,7 @@ tex_t renderer_buffer_texture(const char* filename) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  print_error("loading texture");
   free(image);
   return t;
 }

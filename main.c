@@ -8,6 +8,7 @@
 void update(float delta_time, void* data);
 
 typedef struct {
+  window_t* window;
   renderer_t* renderer;
   render_obj_t* tri1;
   render_obj_t* tri2;
@@ -22,6 +23,7 @@ int main() {
   renderer_init(renderer);
 
   app_t app;
+  app.window = &window;
   window.data = &app;
   app.renderer = renderer;
   app.speed = 1.0f;
@@ -52,8 +54,10 @@ int main() {
   render_obj_attach_texture(app.tri1, tex);
   render_obj_attach_texture(app.tri2, tex2);
 
-  mesh = renderer_buffer_mesh_from_file("cube.dae");
-  renderer_create_obj(renderer, mesh);
+  mesh = renderer_buffer_mesh_from_file("spot.obj");
+  render_obj_t* spot = renderer_create_obj(renderer, mesh);
+  tex_t spot_tex = renderer_buffer_texture("spot_texture.png");
+  render_obj_attach_texture(spot, spot_tex);
 
   window_run(&window, update);
 
@@ -66,6 +70,22 @@ void update(float delta_time, void* data) {
   app->tri2->transform.m30 -= app->speed * delta_time;
   if (app->tri2->transform.m30 >= 1.0f || app->tri2->transform.m30 <= -1.0f) {
     app->speed = -app->speed;
+  }
+  int state = glfwGetKey(app->window->glfw_win, GLFW_KEY_A);
+  if (state == GLFW_PRESS) {
+    renderer_translate_camera_x(app->renderer, -1.0 * delta_time);
+  }
+  state = glfwGetKey(app->window->glfw_win, GLFW_KEY_D);
+  if (state == GLFW_PRESS) {
+    renderer_translate_camera_x(app->renderer, 1.0 * delta_time);
+  }
+  state = glfwGetKey(app->window->glfw_win, GLFW_KEY_W);
+  if (state == GLFW_PRESS) {
+    renderer_translate_camera_y(app->renderer, 1.0 * delta_time);
+  }
+  state = glfwGetKey(app->window->glfw_win, GLFW_KEY_S);
+  if (state == GLFW_PRESS) {
+    renderer_translate_camera_y(app->renderer, -1.0 * delta_time);
   }
   render(app->renderer);
 }

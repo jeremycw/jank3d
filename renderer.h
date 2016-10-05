@@ -19,6 +19,7 @@ typedef struct {
 typedef struct {
   vec3_t position;
   vec3_t up;
+  vec3_t look;
   mat4_t view;
   mat4_t projection;
 } camera_t;
@@ -44,5 +45,7 @@ tex_t renderer_buffer_texture(const char* filename);
 void render_obj_attach_texture(render_obj_t* render_obj, tex_t tex);
 mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert_count);
 mesh_t renderer_buffer_mesh_from_file(char* filename);
+void renderer_translate_camera_x(renderer_t* renderer, float magnitude);
+void renderer_translate_camera_y(renderer_t* renderer, float magnitude);
 
 #endif

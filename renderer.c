@@ -103,7 +103,8 @@ void renderer_init(renderer_t* renderer) {
   camera_t camera;
   camera.position = vec3(2.0f, 0.0f, -2.0f);
   camera.up = vec3(0,1,0);
-  camera.view = m4_look_at(camera.position, vec3(0,0,0), camera.up);
+  camera.look = vec3(0,0,0);
+  camera.view = m4_look_at(camera.position, camera.look, camera.up);
   camera.projection = m4_perspective(67.0f, 1.333, 0.1f, 1000);
   renderer->camera = camera;
 }
@@ -115,6 +116,7 @@ void render_obj_create(render_obj_t* render_obj, mesh_t mesh) {
 }
 
 void render(renderer_t* renderer) {
+  renderer->camera.view = m4_look_at(renderer->camera.position, renderer->camera.look, renderer->camera.up);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   render_objs(renderer->render_objs, renderer->obj_count, renderer);
 }
@@ -161,6 +163,23 @@ mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert
   return mesh;
 }
 
+void renderer_translate_camera_x(renderer_t* renderer, float magnitude) {
+  vec3_t look_dir =
+    v3_sub(renderer->camera.look, renderer->camera.position);
+  vec3_t direction =
+    v3_norm(v3_cross(look_dir, renderer->camera.up));
+  vec3_t delta = v3_muls(direction, magnitude);
+  renderer->camera.position = v3_add(renderer->camera.position, delta);
+  renderer->camera.look = v3_add(renderer->camera.look, delta);
+}
+
+void renderer_translate_camera_y(renderer_t* renderer, float magnitude) {
+  vec3_t direction = v3_norm(renderer->camera.up);
+  vec3_t delta = v3_muls(direction, magnitude);
+  renderer->camera.position = v3_add(renderer->camera.position, delta);
+  renderer->camera.look = v3_add(renderer->camera.look, delta);
+}
+
 mesh_t renderer_buffer_mesh_from_file(char* filename) {
   const struct aiScene* scene = aiImportFile(filename, aiProcess_Triangulate);
   const struct aiMesh* mesh = scene->mMeshes[0];
@@ -175,8 +194,11 @@ mesh_t renderer_buffer_mesh_from_file(char* filename) {
   }
   float* uvs = NULL;
   if (mesh->mNumUVComponents[0] > 0) {
-    (void)uvs;
-    //copy uv
+    uvs = malloc(sizeof(float) * 2 * mesh->mNumVertices);
+    for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+      uvs[i*2] = mesh->mTextureCoords[0][i].x;
+      uvs[i*2+1] = mesh->mTextureCoords[0][i].y;
+    }
   }
   mesh_t m = renderer_buffer_mesh(vertices, normals, uvs, mesh->mNumVertices);
   aiReleaseImport(scene);

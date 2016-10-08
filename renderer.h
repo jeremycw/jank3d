@@ -17,6 +17,8 @@ typedef struct {
 } render_obj_t;
 
 typedef struct {
+  float yaw;
+  float pitch;
   vec3_t position;
   vec3_t up;
   vec3_t look;
@@ -45,7 +47,7 @@ tex_t renderer_buffer_texture(const char* filename);
 void render_obj_attach_texture(render_obj_t* render_obj, tex_t tex);
 mesh_t renderer_buffer_mesh(float* vertices, float* normals, float* uv, int vert_count);
 mesh_t renderer_buffer_mesh_from_file(char* filename);
-void renderer_translate_camera_x(renderer_t* renderer, float magnitude);
-void renderer_translate_camera_y(renderer_t* renderer, float magnitude);
+void renderer_translate_camera(renderer_t* renderer, float x, float y, float z);
+void renderer_yaw_pitch_camera(renderer_t* renderer, float yaw, float pitch);
 
 #endif

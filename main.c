@@ -12,6 +12,8 @@ typedef struct {
   renderer_t* renderer;
   render_obj_t* tri1;
   render_obj_t* tri2;
+  double prev_x;
+  double prev_y;
   float speed;
 } app_t;
 
@@ -73,20 +75,27 @@ void update(float delta_time, void* data) {
   }
   int state = glfwGetKey(app->window->glfw_win, GLFW_KEY_A);
   if (state == GLFW_PRESS) {
-    renderer_translate_camera_x(app->renderer, -1.0 * delta_time);
+    renderer_translate_camera(app->renderer, -1.0 * delta_time, 0, 0);
   }
   state = glfwGetKey(app->window->glfw_win, GLFW_KEY_D);
   if (state == GLFW_PRESS) {
-    renderer_translate_camera_x(app->renderer, 1.0 * delta_time);
+    renderer_translate_camera(app->renderer, 1.0 * delta_time, 0, 0);
   }
   state = glfwGetKey(app->window->glfw_win, GLFW_KEY_W);
   if (state == GLFW_PRESS) {
-    renderer_translate_camera_y(app->renderer, 1.0 * delta_time);
+    renderer_translate_camera(app->renderer, 0, 0, 1.0 * delta_time);
   }
   state = glfwGetKey(app->window->glfw_win, GLFW_KEY_S);
   if (state == GLFW_PRESS) {
-    renderer_translate_camera_y(app->renderer, -1.0 * delta_time);
+    renderer_translate_camera(app->renderer, 0, 0, -1.0 * delta_time);
   }
+  double xpos, ypos;
+  glfwGetCursorPos(app->window->glfw_win, &xpos, &ypos);
+  double yaw_delta = xpos - app->prev_x;
+  double pitch_delta = ypos - app->prev_y;
+  app->prev_x = xpos;
+  app->prev_y = ypos;
+  renderer_yaw_pitch_camera(app->renderer, 0.2f * yaw_delta, -0.2f * pitch_delta);
   render(app->renderer);
 }
 

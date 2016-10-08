@@ -14,6 +14,7 @@ int window_init(window_t* window, int width, int height) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   window->glfw_win = glfwCreateWindow(width, height, "Hello Triangle", NULL, NULL);
+  glfwSetInputMode(window->glfw_win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   window->width = width;
   window->height = height;
   if (!window) {

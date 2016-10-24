@@ -105,6 +105,7 @@ void renderer_init(renderer_t* renderer) {
   camera.up = vec3(0,1,0);
   camera.look = vec3(0,0,1);
   camera.view = m4_look_at(camera.position, v3_add(camera.look, camera.position), camera.up);
+  camera.yaw = 90;
   camera.projection = m4_perspective(67.0f, 1.333, 0.1f, 1000);
   renderer->camera = camera;
 }

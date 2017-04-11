@@ -17,7 +17,7 @@ int window_init(window_t* window, int width, int height) {
   glfwSetInputMode(window->glfw_win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   window->width = width;
   window->height = height;
-  if (!window) {
+  if (!window->glfw_win) {
     printf("couldnt open window\n");
     glfwTerminate();
     return 1;

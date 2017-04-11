@@ -252,6 +252,47 @@ tex_t renderer_buffer_texture(const char* filename) {
   return t;
 }
 
+void render_obj_rotate_around_axis(render_obj_t* render_obj, vec3_t axis, float angle) {
+  render_obj->quat = quat_axis_angle(axis, angle);
+  render_obj->transform = m4_from_quat(render_obj->quat);
+}
+
+void render_obj_set_x(render_obj_t* render_obj, float x) {
+  render_obj->transform.m30 = x;
+}
+
+void render_obj_set_y(render_obj_t* render_obj, float y) {
+  render_obj->transform.m31 = y;
+}
+
+void render_obj_set_z(render_obj_t* render_obj, float z) {
+  render_obj->transform.m32 = z;
+}
+
+void render_obj_translate_x(render_obj_t* render_obj, float x) {
+  render_obj->transform.m30 += x;
+}
+
+void render_obj_translate_y(render_obj_t* render_obj, float y) {
+  render_obj->transform.m31 += y;
+}
+
+void render_obj_translate_z(render_obj_t* render_obj, float z) {
+  render_obj->transform.m32 += z;
+}
+
+float render_obj_x(render_obj_t* render_obj) {
+  return render_obj->transform.m30;
+}
+
+float render_obj_y(render_obj_t* render_obj) {
+  return render_obj->transform.m31;
+}
+
+float render_obj_z(render_obj_t* render_obj) {
+  return render_obj->transform.m32;
+}
+
 void render_obj_attach_texture(render_obj_t* render_obj, tex_t tex) {
   render_obj->tex = tex.tex;
 }

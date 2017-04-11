@@ -50,4 +50,14 @@ mesh_t renderer_buffer_mesh_from_file(char* filename);
 void renderer_translate_camera(renderer_t* renderer, float x, float y, float z);
 void renderer_yaw_pitch_camera(renderer_t* renderer, float yaw, float pitch);
 
+void render_obj_rotate_around_axis(render_obj_t* render_obj, vec3_t axis, float angle);
+void render_obj_set_x(render_obj_t* render_obj, float x);
+void render_obj_set_y(render_obj_t* render_obj, float y);
+void render_obj_set_z(render_obj_t* render_obj, float z);
+void render_obj_translate_x(render_obj_t* render_obj, float x);
+void render_obj_translate_y(render_obj_t* render_obj, float y);
+void render_obj_translate_z(render_obj_t* render_obj, float z);
+float render_obj_x(render_obj_t* render_obj);
+float render_obj_y(render_obj_t* render_obj);
+float render_obj_z(render_obj_t* render_obj);
 #endif

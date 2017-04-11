@@ -44,10 +44,9 @@ int main() {
 
   mesh_t mesh = renderer_buffer_mesh(points, NULL, uv, 3);
   app.tri1 = renderer_create_obj(renderer, mesh);
-  app.tri1->quat = quat_axis_angle(renderer->camera.up, 0.78);
-  app.tri1->transform = m4_from_quat(app.tri1->quat);
+  render_obj_rotate_around_axis(app.tri1, renderer->camera.up, 0.78);
   app.tri2 = renderer_create_obj(renderer, mesh);
-  app.tri2->transform.m32 = 4.0f;
+  render_obj_set_z(app.tri2, 4.0f);
 
   //create texture coords
   tex_t tex = renderer_buffer_texture("textures/default_grass.png");
@@ -68,9 +67,9 @@ int main() {
 
 void update(float delta_time, void* data) {
   app_t* app = (app_t*)data;
-  app->tri1->transform.m30 += app->speed * delta_time;
-  app->tri2->transform.m30 -= app->speed * delta_time;
-  if (app->tri2->transform.m30 >= 1.0f || app->tri2->transform.m30 <= -1.0f) {
+  render_obj_translate_x(app->tri1, app->speed * delta_time);
+  render_obj_translate_x(app->tri2, -app->speed * delta_time);
+  if (render_obj_x(app->tri2) >= 1.0f || render_obj_x(app->tri2) <= -1.0f) {
     app->speed = -app->speed;
   }
   int state = glfwGetKey(app->window->glfw_win, GLFW_KEY_A);

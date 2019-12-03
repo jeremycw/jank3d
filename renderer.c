@@ -20,16 +20,20 @@ void print_error(char* message) {
   }
 }
 
+#define ACTIVE_TEXTURE 0
+
 void render_objs(render_obj_t* render_objs, int count, renderer_t* renderer) {
   for (int i = 0; i < count; i++) {
     glUseProgram(renderer->program);
     glBindTexture(GL_TEXTURE_2D, render_objs[i].tex);
-    GLuint mat_location = glGetUniformLocation(renderer->program, "model");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, render_objs[i].transform.buf);
-    mat_location = glGetUniformLocation(renderer->program, "view");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, renderer->camera.view.buf);
-    mat_location = glGetUniformLocation(renderer->program, "projection");
-    glUniformMatrix4fv(mat_location, 1, GL_FALSE, renderer->camera.projection.buf);
+    GLuint uni_location = glGetUniformLocation(renderer->program, "model");
+    glUniformMatrix4fv(uni_location, 1, GL_FALSE, render_objs[i].transform.buf);
+    uni_location = glGetUniformLocation(renderer->program, "view");
+    glUniformMatrix4fv(uni_location, 1, GL_FALSE, renderer->camera.view.buf);
+    uni_location = glGetUniformLocation(renderer->program, "projection");
+    glUniformMatrix4fv(uni_location, 1, GL_FALSE, renderer->camera.projection.buf);
+    uni_location = glGetUniformLocation(renderer->program, "tex");
+    glUniform1i(uni_location, ACTIVE_TEXTURE);
     glBindVertexArray(render_objs[i].mesh.vao);
     glDrawArrays(GL_TRIANGLES, 0, render_objs[i].mesh.vert_count);
     print_error("drawing");
@@ -91,6 +95,8 @@ void renderer_init(renderer_t* renderer) {
   glAttachShader(program, fs);
   glBindAttribLocation(program, 0, "vposition");
   glBindAttribLocation(program, 1, "vtexcoords");
+  glDrawBuffers(1, (GLuint[]){ GL_BACK_LEFT });
+  glBindFragDataLocation(program, 0, "frag_colour");
   glLinkProgram(program);
   renderer->program = program;
 
